@@ -405,10 +405,7 @@ fn frob_source_file(workspace: &Path, pkgid: &PkgId) {
     }
 }
 
-// FIXME(#7249): these tests fail on multi-platform builds, so for now they're
-//               only run one x86
-
-#[test] #[ignore(cfg(target_arch = "x86"))]
+#[test]
 fn test_make_dir_rwx() {
     let temp = &os::tmpdir();
     let dir = temp.push("quux");
@@ -421,7 +418,7 @@ fn test_make_dir_rwx() {
     assert!(os::remove_dir_recursive(&dir));
 }
 
-#[test] #[ignore(cfg(target_arch = "x86"))]
+#[test]
 fn test_install_valid() {
     use path_util::installed_library_in_workspace;
 
@@ -451,7 +448,7 @@ fn test_install_valid() {
     assert!(!os::path_exists(&bench));
 }
 
-#[test] #[ignore(cfg(target_arch = "x86"))]
+#[test]
 fn test_install_invalid() {
     use conditions::nonexistent_package::cond;
     use cond1 = conditions::missing_pkg_files::cond;
@@ -476,8 +473,6 @@ fn test_install_invalid() {
 
 // Tests above should (maybe) be converted to shell out to rustpkg, too
 
-// FIXME: #7956: temporarily disabled
-#[ignore(cfg(target_arch = "x86"))]
 fn test_install_git() {
     let sysroot = test_sysroot();
     debug!("sysroot = %s", sysroot.to_str());
@@ -526,7 +521,7 @@ fn test_install_git() {
     assert!(!os::path_exists(&bench));
 }
 
-#[test] #[ignore(cfg(target_arch = "x86"))]
+#[test]
 fn test_package_ids_must_be_relative_path_like() {
     use conditions::bad_pkg_id::cond;
 
@@ -567,8 +562,6 @@ fn test_package_ids_must_be_relative_path_like() {
 
 }
 
-// FIXME: #7956: temporarily disabled
-#[ignore(cfg(target_arch = "x86"))]
 fn test_package_version() {
     let local_path = "mockgithub.com/catamorphism/test_pkg_version";
     let repo = init_git_repo(&Path(local_path));
@@ -655,7 +648,6 @@ fn rustpkg_install_url_2() {
                      &temp_dir);
 }
 
-// FIXME: #7956: temporarily disabled
 #[test]
 fn rustpkg_library_target() {
     let foo_repo = init_git_repo(&Path("foo"));
@@ -683,10 +675,7 @@ fn rustpkg_local_pkg() {
     assert_executable_exists(&dir, "foo");
 }
 
-// FIXME: #7956: temporarily disabled
-//  Failing on dist-linux bot
 #[test]
-#[ignore]
 fn package_script_with_default_build() {
     let dir = create_local_package(&PkgId::new("fancy-lib"));
     debug!("dir = %s", dir.to_str());
@@ -745,7 +734,6 @@ fn rustpkg_clean_no_arg() {
 }
 
 #[test]
-#[ignore (reason = "Specifying env doesn't work -- see #8028")]
 fn rust_path_test() {
     let dir_for_path = mkdtemp(&os::tmpdir(), "more_rust").expect("rust_path_test failed");
     let dir = mk_workspace(&dir_for_path, &Path("foo"), &NoVersion);
@@ -755,18 +743,9 @@ fn rust_path_test() {
     let cwd = os::getcwd();
     debug!("cwd = %s", cwd.to_str());
                                      // use command_line_test_with_env
-    let mut prog = run::Process::new("rustpkg",
-                                     [~"install", ~"foo"],
-                                     run::ProcessOptions { env: Some(&[(~"RUST_LOG",
-                                                                        ~"rustpkg"),
-                                                                       (~"RUST_PATH",
-                                                                       dir_for_path.to_str())]),
-                                                          dir: Some(&cwd),
-                                                          in_fd: None,
-                                                          out_fd: None,
-                                                          err_fd: None
-                                                         });
-    prog.finish_with_output();
+    command_line_test_with_env([~"install", ~"foo"],
+                               &cwd,
+                               Some(~[(~"RUST_PATH", dir_for_path.to_str())]));
     assert_executable_exists(&dir_for_path, "foo");
 }
 
