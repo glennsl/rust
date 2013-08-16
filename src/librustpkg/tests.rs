@@ -358,7 +358,8 @@ fn lib_output_file_name(workspace: &Path, parent: &str, short_name: &str) -> Pat
                          short_name,
                          Build,
                          workspace,
-                         "build").expect("lib_output_file_name")
+                         "build",
+                         &NoVersion).expect("lib_output_file_name")
 }
 
 fn output_file_name(workspace: &Path, short_name: &str) -> Path {
@@ -683,12 +684,12 @@ fn package_script_with_default_build() {
         push("testsuite").push("pass").push("src").push("fancy-lib").push("pkg.rs");
     debug!("package_script_with_default_build: %s", source.to_str());
     if !os::copy_file(&source,
-                      & dir.push("src").push("fancy_lib-0.1").push("pkg.rs")) {
+                      & dir.push("src").push("fancy-lib-0.1").push("pkg.rs")) {
         fail!("Couldn't copy file");
     }
     command_line_test([~"install", ~"fancy-lib"], &dir);
     assert_lib_exists(&dir, "fancy-lib", NoVersion);
-    assert!(os::path_exists(&dir.push("build").push("fancy_lib").push("generated.rs")));
+    assert!(os::path_exists(&dir.push("build").push("fancy-lib").push("generated.rs")));
 }
 
 #[test]
